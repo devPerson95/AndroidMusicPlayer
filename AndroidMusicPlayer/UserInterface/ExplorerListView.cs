@@ -10,41 +10,74 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidMusicPlayer.Manager;
+using Java.Lang;
 using Java.Util;
 
 namespace AndroidMusicPlayer
 {
     public class ExplorerListView
     {
-        private Context _context;
         private ListView _listView;
-        private FileViewAdapter _curentAdapter;
+        private ExplorerViewAdapter _currentAdapter;
         private FileExplorer _fileExplorer;
+        private ExplorerListViewModel _clickedExplorer;
+        public delegate void ItemDelegate(ExplorerListViewModel item);
 
-        public delegate void ItemClickDelegate(FileListViewModel item);
+        public delegate void FilePreviewDelegate(ExplorerListViewModel item, bool startPreview);
+        public event ItemDelegate FileClick;
+        public event ItemDelegate DirectoryClick;
+        public event FilePreviewDelegate FilePreview;
+        
 
-        public event ItemClickDelegate FileClick;
-        public event ItemClickDelegate DirectoryClick;
-
-        public ExplorerListView(Context context, ListView listView,FileExplorer fileExplorer)
+        public ExplorerListView(ListView listView,FileExplorer fileExplorer)
         {
-            _context = context;
+            
             _listView = listView;
             _fileExplorer = fileExplorer;
             _listView.ItemClick += Item_Click;
+            _listView.ItemLongClick += Long_click;
+        }
+
+        public void Long_click(object sender, AdapterView.ItemLongClickEventArgs e)
+        {
+            var itemId = _currentAdapter.GetItemId(e.Position);
+            var item = _currentAdapter.GetItemFromId(itemId);
+            if (item.IsFile)
+            {
+
+                _clickedExplorer = item;
+                _listView.Touch += List_touch;
+                FilePreview?.Invoke(_clickedExplorer, true);
+                
+            }
+        }
+
+        public void List_touch(object sender, View.TouchEventArgs e)
+        {
+            if (e.Event.Action == MotionEventActions.Up)
+                { 
+                _listView.Touch -= List_touch;
+                if (_clickedExplorer!=null)
+                {
+                    FilePreview?.Invoke(_clickedExplorer,false);
+                }
+                
+            }
 
         }
+        
 
         public void Item_Click(object sender, AdapterView.ItemClickEventArgs e)
         {
-            var itemId = _curentAdapter.GetItemId(e.Position);
+            var itemId = _currentAdapter.GetItemId(e.Position);
             if (itemId==0)
             {
                 _fileExplorer.RemoveLastFromHistory();
             }
-            var item = GetSelectedItem(itemId);
+            var item = _currentAdapter.GetItemFromId(itemId);
             if (item.IsFile)
             {
+              
                 FileClick?.Invoke(item);
             }
             else
@@ -55,19 +88,14 @@ namespace AndroidMusicPlayer
 
         }
 
-        public void SetCurrentAdapter(FileViewAdapter adapter)
+        public void SetCurrentAdapter(ExplorerViewAdapter adapter)
         {
             _listView.Adapter = adapter;
-            _curentAdapter = adapter;
+            _currentAdapter = adapter;
         }
 
-        public FileListViewModel GetSelectedItem(long selectedId)
-        {
-            return _curentAdapter.GetItemWithId(selectedId);
-        }
+      
 
-        
-        
 
         
     }

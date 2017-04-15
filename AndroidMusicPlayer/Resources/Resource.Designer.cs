@@ -51,13 +51,22 @@ namespace AndroidMusicPlayer
 			public const int Icon = 2130837505;
 			
 			// aapt resource value: 0x7f020002
-			public const int pause = 2130837506;
+			public const int pauseBtn = 2130837506;
 			
 			// aapt resource value: 0x7f020003
-			public const int play_03 = 2130837507;
+			public const int playBtn = 2130837507;
 			
 			// aapt resource value: 0x7f020004
-			public const int soundFileIcon = 2130837508;
+			public const int RoundedMediumButton = 2130837508;
+			
+			// aapt resource value: 0x7f020005
+			public const int RoundedSmallButton = 2130837509;
+			
+			// aapt resource value: 0x7f020006
+			public const int soundFileIcon = 2130837510;
+			
+			// aapt resource value: 0x7f020007
+			public const int stopBtn = 2130837511;
 			
 			static Drawable()
 			{
@@ -87,17 +96,17 @@ namespace AndroidMusicPlayer
 			// aapt resource value: 0x7f050003
 			public const int OpenFileBtn = 2131034115;
 			
-			// aapt resource value: 0x7f050008
-			public const int PauseBtn = 2131034120;
-			
 			// aapt resource value: 0x7f050006
-			public const int StopBtn = 2131034118;
-			
-			// aapt resource value: 0x7f050005
-			public const int playBtn = 2131034117;
+			public const int PlayBtn = 2131034118;
 			
 			// aapt resource value: 0x7f050007
-			public const int progressBar1 = 2131034119;
+			public const int pauseBtn = 2131034119;
+			
+			// aapt resource value: 0x7f050005
+			public const int progressBar1 = 2131034117;
+			
+			// aapt resource value: 0x7f050008
+			public const int stopBtn = 2131034120;
 			
 			static Id()
 			{

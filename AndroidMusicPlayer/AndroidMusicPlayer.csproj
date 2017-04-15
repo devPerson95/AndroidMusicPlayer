@@ -56,13 +56,12 @@
     <Compile Include="PlayerActivity.cs" />
     <Compile Include="UserInterface\ExplorerListView.cs" />
     <Compile Include="Manager\FileExplorer.cs" />
-    <Compile Include="Models\FileListViewModel.cs" />
-    <Compile Include="UserInterface\FileViewAdapter.cs" />
+    <Compile Include="Models\ExplorerListViewModel.cs" />
+    <Compile Include="UserInterface\ExplorerListViewAdapter.cs" />
     <Compile Include="MainActivity.cs" />
-    <Compile Include="UserInterface\MediaPlayerUserInterface.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Manager\SoundPlayer.cs" />
+    <Compile Include="Manager\Player.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -88,17 +87,30 @@
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\pause.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable\play_03.png" />
-  </ItemGroup>
-  <ItemGroup>
     <AndroidResource Include="Resources\drawable\folderIcon.png" />
     <AndroidResource Include="Resources\drawable\soundFileIcon.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Graphic\" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\playBtn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\RoundedSmallButton.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\pauseBtn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\stopBtn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\RoundedMediumButton.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

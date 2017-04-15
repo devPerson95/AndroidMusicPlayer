@@ -13,7 +13,7 @@ using Android.Widget;
 
 namespace AndroidMusicPlayer
 {
-   public class FileListViewModel
+   public class ExplorerListViewModel
     {
         public long Id { get; set; }
         public string Name { get; set; }

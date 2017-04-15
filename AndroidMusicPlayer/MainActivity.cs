@@ -27,9 +27,10 @@ namespace AndroidMusicPlayer
         private ListView listViewItem;
         private ExplorerListView itemsView;
         private FileExplorer _fileExplorer;
-        private FileViewAdapter _adapter;
+        private ExplorerViewAdapter _adapter;
         private LinearLayout linear;
         private ProgressBar progressBar;
+        private Player _player;
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -47,8 +48,9 @@ namespace AndroidMusicPlayer
            
             listViewItem=new ListView(this,null,Android.Resource.Layout.SimpleListItem1);
             var startPath= Android.OS.Environment.ExternalStorageDirectory.Path;
+            
             _fileExplorer = new FileExplorer(startPath);
-            itemsView = new ExplorerListView(this, listViewItem,_fileExplorer);
+            itemsView = new ExplorerListView( listViewItem,_fileExplorer);
 
         }
 
@@ -65,7 +67,7 @@ namespace AndroidMusicPlayer
 
         public async  void CallbackFileExplorer()
         {
-            List<FileListViewModel> items=new List<FileListViewModel>();
+            List<ExplorerListViewModel> items=new List<ExplorerListViewModel>();
            
             var item = _fileExplorer.GetDirectoryAsync();
             var itemFile = _fileExplorer.GetFileAsync();
@@ -75,14 +77,19 @@ namespace AndroidMusicPlayer
             linear.RemoveView(_openfileButton);
             linear.RemoveView(progressBar);
             linear.AddView(listViewItem, new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent));
-            _adapter = new FileViewAdapter(this,  items.ToArray());
+            _adapter = new ExplorerViewAdapter(this,  items.ToArray());
             itemsView.SetCurrentAdapter(_adapter);
             itemsView.DirectoryClick += Directory_click;
             itemsView.FileClick += File_click;
+            itemsView.FilePreview += FilePreview;
+
+
         }
+
         
-        public async void Directory_click(FileListViewModel item)
-        {   List<FileListViewModel> listView=new List<FileListViewModel>();
+        
+        public async void Directory_click(ExplorerListViewModel item)
+        {   List<ExplorerListViewModel> listView=new List<ExplorerListViewModel>();
             _fileExplorer.Path = item.FullPath;
             if (!_fileExplorer.IsStartDirectory)
             {
@@ -92,37 +99,48 @@ namespace AndroidMusicPlayer
             listView.AddRange(await _fileExplorer.GetDirectoryAsync());
             listView.AddRange(await _fileExplorer.GetFileAsync());
             
-            var adapter = new FileViewAdapter(this, listView.ToArray());
+            var adapter = new ExplorerViewAdapter(this, listView.ToArray());
             itemsView.SetCurrentAdapter(adapter);
         }
-        public void File_click(FileListViewModel item)
+
+        public void FilePreview(ExplorerListViewModel item,bool play)
         {
-            Intent playerActivity=new Intent(this,typeof(PlayerActivity));
+            if (_player==null)
+            {
+                _player = new Player(item.FullPath);
+            }
+            if (!_player.Path.Equals(item.FullPath))
+            {
+                _player.SetPath(item.FullPath);
+            }
+            if (play)
+            {
+                _player.Play();
+                Toast.MakeText(this, "Podgląd aktywny", ToastLength.Short).Show();
+            }
+            else
+            {
+                _player.Stop();
+                Toast.MakeText(this, "Podgląd nieaktywny", ToastLength.Short).Show();
+            }
+           
+            
+        }
+
+        
+
+
+        public void File_click(ExplorerListViewModel item)
+        {
+            Intent playerActivity = new Intent(this, typeof(PlayerActivity));
             var itemJson = JsonConvert.SerializeObject(item);
             playerActivity.PutExtra("File", itemJson);
             StartActivity(playerActivity);
-            //SoundPlayer player = new SoundPlayer(item.FullPath);
-            //MediaPlayerUserInterface userInterface=new MediaPlayerUserInterface(this,player);
-            //SetContentView(userInterface.CreatePlayer());
-            //userInterface.DisposeEvent += () => { SetContentView(Resource.Layout.Main); };
+           
+            
         }
 
 
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

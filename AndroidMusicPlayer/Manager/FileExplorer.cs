@@ -49,14 +49,14 @@ namespace AndroidMusicPlayer.Manager
             _pathHistory.Add(startPath);
             IsStartDirectory = true;
            
-            _id = 1;
+            _id = 0;
         }
 
-       public Task<List<FileListViewModel>> GetDirectoryAsync()
+       public Task<List<ExplorerListViewModel>> GetDirectoryAsync()
        {
            return Task.Factory.StartNew(() => GetDirectory());
        }
-        public Task<List<FileListViewModel>> GetFileAsync()
+        public Task<List<ExplorerListViewModel>> GetFileAsync()
         {
             return Task.Factory.StartNew(() => GetFileFrom());
         }
@@ -74,15 +74,15 @@ namespace AndroidMusicPlayer.Manager
        {
            return _pathHistory;
        }
-       public FileListViewModel GetPreviousDirectory()
+       public ExplorerListViewModel GetPreviousDirectory()
        {
-           var itemFullPath = _pathHistory[_pathHistory.Count - 2];
-           if (itemFullPath!=String.Empty)
+           var prevoiusFullPath = _pathHistory[_pathHistory.Count - 2];
+           if (prevoiusFullPath!=String.Empty)
            {
                
-                var item = new FileListViewModel
+                var item = new ExplorerListViewModel
                 {
-                    FullPath = itemFullPath,
+                    FullPath = prevoiusFullPath,
                     Id = 0,
                     IsFile = false,
                     Name = "..."
@@ -97,7 +97,7 @@ namespace AndroidMusicPlayer.Manager
            
        }
 
-        public List<FileListViewModel> GetDirectory()
+        public List<ExplorerListViewModel> GetDirectory()
        {
           
             var directoryInfo=new DirectoryInfo(_path);
@@ -105,10 +105,10 @@ namespace AndroidMusicPlayer.Manager
            {
 
                var directories = directoryInfo.EnumerateDirectories();
-                var resultList=new List<FileListViewModel>();
+                var items=new List<ExplorerListViewModel>();
                 Parallel.ForEach(directories,(director)=>
                {
-                   resultList.Add(new FileListViewModel
+                   items.Add(new ExplorerListViewModel
                    {
                        FullPath = director.FullName,
                        Name = director.Name,
@@ -120,7 +120,7 @@ namespace AndroidMusicPlayer.Manager
                })
                ;
               
-               return resultList;
+               return items;
            }
            else
            {
@@ -128,17 +128,17 @@ namespace AndroidMusicPlayer.Manager
            }
        }
 
-       public List<FileListViewModel> GetFileFrom()
+       public List<ExplorerListViewModel> GetFileFrom()
        {
            var directoryInfo=new DirectoryInfo(_path);
            if (directoryInfo.Exists)
            {
                
-                var resultList =new List<FileListViewModel>();
+                var items =new List<ExplorerListViewModel>();
                var files = directoryInfo.EnumerateFiles();
                Parallel.ForEach(files, file =>
                {
-                   resultList.Add(new FileListViewModel
+                   items.Add(new ExplorerListViewModel
                    {
                        FullPath = file.FullName,
                        Name = file.Name,
@@ -148,7 +148,7 @@ namespace AndroidMusicPlayer.Manager
                    _id++;
                });
                
-               return resultList;
+               return items;
            }
            else
            {

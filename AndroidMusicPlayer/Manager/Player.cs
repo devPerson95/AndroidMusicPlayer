@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,17 +15,14 @@ using Java.Security;
 
 namespace AndroidMusicPlayer
 {
-   public class SoundPlayer
+   public class Player:IDisposable
    {
        private MediaPlayer _player;
        private string _path;
        private bool isStoped;
        public bool IsPlaying { get { return _player.IsPlaying; } }
-
-       public delegate void MediaProgressDelegate(int progress);
-
-       public event MediaProgressDelegate MediaProgressEvent;
-       public SoundPlayer(string path)
+        public string Path { get { return _path; } }
+       public Player(string path)
        {
            _player=new MediaPlayer();
            _path = path;
@@ -33,6 +31,14 @@ namespace AndroidMusicPlayer
 
        }
 
+       public void SetPath(string path)
+       {
+           var file = new FileInfo(path);
+           if (file.Exists)
+           {
+               _path = path;
+           }
+       }
        
        public void Play()
        {
@@ -50,8 +56,9 @@ namespace AndroidMusicPlayer
                
            
        }
+       
 
-       public Task<int> GetProgressAsync()
+        public Task<int> GetProgressAsync()
        {
            return Task<int>.Factory.StartNew(() => { return (_player.CurrentPosition*100)/_player.Duration; });
        }
@@ -59,10 +66,10 @@ namespace AndroidMusicPlayer
        public int GetProgress()
        {
            
-              return _player.CurrentPosition;
+              return ((_player.CurrentPosition * 100) / _player.Duration);
 
 
-       }
+        }
 
        public void Pause()
        {
@@ -85,8 +92,9 @@ namespace AndroidMusicPlayer
 
        public void Dispose()
        {
+            Stop();
            _player.Release();
-            _player.Dispose();
+          _player.Dispose();
            
             
        }

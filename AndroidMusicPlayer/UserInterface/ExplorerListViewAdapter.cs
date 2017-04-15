@@ -16,20 +16,20 @@ using Object = Java.Lang.Object;
 
 namespace AndroidMusicPlayer
 {
-   public class FileViewAdapter:BaseAdapter
+   public class ExplorerViewAdapter:BaseAdapter
     {
-        private List<FileListViewModel> _fileList;
+        private List<ExplorerListViewModel> _explorerList;
         private Context _context;
 
-        public FileViewAdapter(Context context, FileListViewModel[] fileList)
+        public ExplorerViewAdapter(Context context, ExplorerListViewModel[] explorerList)
         {
-            _fileList = fileList.ToList();
+            _explorerList = explorerList.ToList();
             _context = context;
         }
 
-        public FileViewAdapter(IEnumerable<FileListViewModel> fileList)
+        public ExplorerViewAdapter(IEnumerable<ExplorerListViewModel> fileList)
         {
-            _fileList = fileList.ToList();
+            _explorerList = fileList.ToList();
         }
         public override Object GetItem(int position)
         {
@@ -38,7 +38,7 @@ namespace AndroidMusicPlayer
 
         public override long GetItemId(int position)
         {
-            return _fileList[position].Id;
+            return _explorerList[position].Id;
         }
 
         public override View GetView(int position, View convertView, ViewGroup parent)
@@ -46,9 +46,9 @@ namespace AndroidMusicPlayer
             var view = convertView ??
                        LayoutInflater.From(_context).Inflate(Resource.Layout.FileListView, null, false);
             var textView = view.FindViewById<TextView>(Resource.Id.ContentText);
-            textView.Text = _fileList[position].Name;
+            textView.Text = _explorerList[position].Name;
             var imageView = view.FindViewById<ImageView>(Resource.Id.ItemImage);
-            if (_fileList[position].IsFile)
+            if (_explorerList[position].IsFile)
             {
                 imageView.SetImageResource(Resource.Drawable.soundFileIcon);
             }
@@ -60,10 +60,10 @@ namespace AndroidMusicPlayer
             return view;
         }
 
-        public FileListViewModel GetItemWithId(long id)
+        public ExplorerListViewModel GetItemFromId(long id)
         {
-            return _fileList.FirstOrDefault(m => m.Id == id);
+            return _explorerList.FirstOrDefault(m => m.Id == id);
         }
-        public override int Count { get { return _fileList.Count; } }
+        public override int Count { get { return _explorerList.Count; } }
     }
 }
