@@ -5,8 +5,13 @@
     android:layout_height="fill_parent"
     android:id="@+id/MainLayout">
     <Button
-        android:text="Open File"
+        android:text="Pamięć Wewnętrzna"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/OpenFileBtn" />
+        android:id="@+id/internalStorageBtn" />
+    <Button
+        android:text="Pamięć Zewnętrzna"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/externalStorageBtn" />
 </LinearLayout>

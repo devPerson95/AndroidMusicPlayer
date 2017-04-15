@@ -23,13 +23,14 @@ namespace AndroidMusicPlayer
     public class MainActivity : Activity
     {
        
-        private Button _openfileButton;
-        private ListView listViewItem;
-        private ExplorerListView itemsView;
+        private Button _internalStorageBtn;
+        private Button _externalStorageBtn;
+        private ListView _listView;
+        private ExplorerListView _explorerList;
         private FileExplorer _fileExplorer;
         private ExplorerViewAdapter _adapter;
-        private LinearLayout linear;
-        private ProgressBar progressBar;
+        private LinearLayout _layout;
+        private ProgressBar _progressBar;
         private Player _player;
         protected override void OnCreate(Bundle bundle)
         {
@@ -42,29 +43,55 @@ namespace AndroidMusicPlayer
             // and attach an event to it
            
            
-            _openfileButton = FindViewById<Button>(Resource.Id.OpenFileBtn);
-            linear = FindViewById<LinearLayout>(Resource.Id.MainLayout);
-            _openfileButton.Click += OpenFileButton_Click;
-           
-            listViewItem=new ListView(this,null,Android.Resource.Layout.SimpleListItem1);
-            var startPath= Android.OS.Environment.ExternalStorageDirectory.Path;
-            
-            _fileExplorer = new FileExplorer(startPath);
-            itemsView = new ExplorerListView( listViewItem,_fileExplorer);
+           Initialization();
 
         }
 
-        
-        protected  void OpenFileButton_Click(object sender, EventArgs e)
+        private void Initialization()
         {
-           
-           
+            _internalStorageBtn = FindViewById<Button>(Resource.Id.internalStorageBtn);
+            _externalStorageBtn = FindViewById<Button>(Resource.Id.externalStorageBtn);
+            _layout = FindViewById<LinearLayout>(Resource.Id.MainLayout);
+            _internalStorageBtn.Click += InternalStorageButton_Click;
+            _externalStorageBtn.Click += ExternalStorageButton_Click;
+            _listView = new ListView(this, null, Android.Resource.Layout.SimpleListItem1);
+            _fileExplorer = new FileExplorer();
+            _explorerList = new ExplorerListView(_listView, _fileExplorer);
+        }
+        public string GetInternalStorage()
+        {
+            var storages = GetExternalFilesDirs(null);
+            var internalStorage = storages[0];
+            var directories = internalStorage.AbsolutePath.Split('/');
+            var path = Path.Combine(directories[1], directories[2],directories[3]);
+            return path;
+        }
+        public string GetExternalStorage()
+        {
+            var storages = GetExternalFilesDirs(null);
+            var externalStorage = storages[1];
+            var directories =externalStorage.AbsolutePath.Split('/');
+            var path = Path.Combine(directories[1], directories[2]);
+            return path;
+        }
+        protected  void InternalStorageButton_Click(object sender, EventArgs e)
+        {
+            var startPath = GetInternalStorage();
+            _fileExplorer.Path = startPath;
             CallbackFileExplorer();
-            progressBar = new ProgressBar(this, null, Android.Resource.Attribute.ProgressBarStyleSmall);
-            linear.AddView(progressBar);
+            _progressBar = new ProgressBar(this, null, Android.Resource.Attribute.ProgressBarStyleSmall);
+            _layout.AddView(_progressBar);
 
         }
+        protected void ExternalStorageButton_Click(object sender, EventArgs e)
+        {
+            var startPath = GetExternalStorage();
+            _fileExplorer.Path = startPath;
+            CallbackFileExplorer();
+            _progressBar = new ProgressBar(this, null, Android.Resource.Attribute.ProgressBarStyleSmall);
+            _layout.AddView(_progressBar);
 
+        }
         public async  void CallbackFileExplorer()
         {
             List<ExplorerListViewModel> items=new List<ExplorerListViewModel>();
@@ -74,14 +101,15 @@ namespace AndroidMusicPlayer
             items.AddRange(await  item);
             items.AddRange(await itemFile);
            
-            linear.RemoveView(_openfileButton);
-            linear.RemoveView(progressBar);
-            linear.AddView(listViewItem, new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent));
+            _layout.RemoveView(_internalStorageBtn);
+            _layout.RemoveView(_progressBar);
+            _layout.RemoveView(_externalStorageBtn);
+            _layout.AddView(_listView, new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent));
             _adapter = new ExplorerViewAdapter(this,  items.ToArray());
-            itemsView.SetCurrentAdapter(_adapter);
-            itemsView.DirectoryClick += Directory_click;
-            itemsView.FileClick += File_click;
-            itemsView.FilePreview += FilePreview;
+            _explorerList.SetCurrentAdapter(_adapter);
+            _explorerList.DirectoryClick += Directory_click;
+            _explorerList.FileClick += File_click;
+            _explorerList.FilePreview += FilePreview;
 
 
         }
@@ -100,7 +128,7 @@ namespace AndroidMusicPlayer
             listView.AddRange(await _fileExplorer.GetFileAsync());
             
             var adapter = new ExplorerViewAdapter(this, listView.ToArray());
-            itemsView.SetCurrentAdapter(adapter);
+            _explorerList.SetCurrentAdapter(adapter);
         }
 
         public void FilePreview(ExplorerListViewModel item,bool play)
@@ -136,8 +164,7 @@ namespace AndroidMusicPlayer
             var itemJson = JsonConvert.SerializeObject(item);
             playerActivity.PutExtra("File", itemJson);
             StartActivity(playerActivity);
-           
-            
+
         }
 
 

@@ -52,6 +52,14 @@ namespace AndroidMusicPlayer.Manager
             _id = 0;
         }
 
+       public FileExplorer()
+       {
+            _pathHistory = new List<string>();
+            IsStartDirectory = true;
+
+            _id = 0;
+        }
+
        public Task<List<ExplorerListViewModel>> GetDirectoryAsync()
        {
            return Task.Factory.StartNew(() => GetDirectory());

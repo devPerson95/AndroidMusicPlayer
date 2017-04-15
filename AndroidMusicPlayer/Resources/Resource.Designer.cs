@@ -90,23 +90,26 @@ namespace AndroidMusicPlayer
 			// aapt resource value: 0x7f050002
 			public const int MainLayout = 2131034114;
 			
-			// aapt resource value: 0x7f050004
-			public const int NameTextView = 2131034116;
-			
-			// aapt resource value: 0x7f050003
-			public const int OpenFileBtn = 2131034115;
-			
-			// aapt resource value: 0x7f050006
-			public const int PlayBtn = 2131034118;
+			// aapt resource value: 0x7f050005
+			public const int NameTextView = 2131034117;
 			
 			// aapt resource value: 0x7f050007
-			public const int pauseBtn = 2131034119;
+			public const int PlayBtn = 2131034119;
 			
-			// aapt resource value: 0x7f050005
-			public const int progressBar1 = 2131034117;
+			// aapt resource value: 0x7f050004
+			public const int externalStorageBtn = 2131034116;
+			
+			// aapt resource value: 0x7f050003
+			public const int internalStorageBtn = 2131034115;
 			
 			// aapt resource value: 0x7f050008
-			public const int stopBtn = 2131034120;
+			public const int pauseBtn = 2131034120;
+			
+			// aapt resource value: 0x7f050006
+			public const int progressBar1 = 2131034118;
+			
+			// aapt resource value: 0x7f050009
+			public const int stopBtn = 2131034121;
 			
 			static Id()
 			{
