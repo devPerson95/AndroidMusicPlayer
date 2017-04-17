@@ -92,7 +92,10 @@ namespace AndroidMusicPlayer
 
        public void Dispose()
        {
-            Stop();
+           if (!isStoped)
+           {
+                Stop();
+            }
            _player.Release();
           _player.Dispose();
            

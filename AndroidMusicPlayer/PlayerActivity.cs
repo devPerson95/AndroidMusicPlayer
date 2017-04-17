@@ -18,6 +18,9 @@ namespace AndroidMusicPlayer
     public class PlayerActivity : Activity
     {
         private Player _player;
+        private ImageButton _playBtn;
+        private ImageButton _pauseBtn;
+        private ImageButton _stopBtn;
         private ProgressBar _progressBar;
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -27,6 +30,12 @@ namespace AndroidMusicPlayer
             // Create your application here
         }
 
+        protected override void OnDestroy()
+        {
+            Dispose();
+            base.OnDestroy();
+        }
+
         private void Initialization()
         {
             SetContentView(Resource.Layout.PlayerLayout);
@@ -34,16 +43,24 @@ namespace AndroidMusicPlayer
             var item = Intent.GetStringExtra("File");
             var file = JsonConvert.DeserializeObject<ExplorerListViewModel>(item);
             textView.Text = file.Name;
-            var btnPlay = FindViewById<ImageButton>(Resource.Id.PlayBtn);
-            btnPlay.Click += BtnPlay_click;
-            var btnPause = FindViewById<ImageButton>(Resource.Id.pauseBtn);
-            btnPause.Click += BtnPause_click;
-            var btnStop = FindViewById<ImageButton>(Resource.Id.stopBtn);
-            btnStop.Click += BtnStop_click;
+             _playBtn = FindViewById<ImageButton>(Resource.Id.PlayBtn);
+            _playBtn.Click += PlayBtn_click;
+             _pauseBtn = FindViewById<ImageButton>(Resource.Id.pauseBtn);
+            _pauseBtn.Click += PauseBtn_click;
+             _stopBtn = FindViewById<ImageButton>(Resource.Id.stopBtn);
+            _stopBtn.Click += StopBtn_click;
             _player = new Player(file.FullPath);
             _progressBar = FindViewById<ProgressBar>(Resource.Id.progressBar1);
         }
-        public void BtnPlay_click(object sender, EventArgs e)
+
+        private void Dispose()
+        {
+            _playBtn.Click -= PlayBtn_click;
+            _pauseBtn.Click -= PauseBtn_click;
+            _stopBtn.Click -= StopBtn_click;
+            _player.Dispose();
+        }
+        public void PlayBtn_click(object sender, EventArgs e)
         {
          _player.Play();
            UpdateProgress();
@@ -67,11 +84,11 @@ namespace AndroidMusicPlayer
 
             }
         }
-        public void BtnPause_click(object sender, EventArgs e)
+        public void PauseBtn_click(object sender, EventArgs e)
         {
             _player.Pause();
         }
-        public void BtnStop_click(object sender, EventArgs e)
+        public void StopBtn_click(object sender, EventArgs e)
         {
             _player.Stop();
         }

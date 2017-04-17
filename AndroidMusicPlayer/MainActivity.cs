@@ -47,6 +47,13 @@ namespace AndroidMusicPlayer
 
         }
 
+        protected override void OnDestroy()
+        {
+           this.Dispose();
+            base.OnDestroy();
+        }
+
+        
         private void Initialization()
         {
             _internalStorageBtn = FindViewById<Button>(Resource.Id.internalStorageBtn);
@@ -58,6 +65,12 @@ namespace AndroidMusicPlayer
             _fileExplorer = new FileExplorer();
             _explorerList = new ExplorerListView(_listView, _fileExplorer);
         }
+        private void Dispose()
+        {
+         _listView.Dispose();
+        _layout.Dispose();
+        _player.Dispose();
+    }
         public string GetInternalStorage()
         {
             var storages = GetExternalFilesDirs(null);
@@ -100,10 +113,14 @@ namespace AndroidMusicPlayer
             var itemFile = _fileExplorer.GetFileAsync();
             items.AddRange(await  item);
             items.AddRange(await itemFile);
-           
+            _internalStorageBtn.Click -= InternalStorageButton_Click;
+            _externalStorageBtn.Click -= ExternalStorageButton_Click;
             _layout.RemoveView(_internalStorageBtn);
+            _internalStorageBtn.Dispose();
             _layout.RemoveView(_progressBar);
+            _progressBar.Dispose();
             _layout.RemoveView(_externalStorageBtn);
+            _externalStorageBtn.Dispose();
             _layout.AddView(_listView, new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent));
             _adapter = new ExplorerViewAdapter(this,  items.ToArray());
             _explorerList.SetCurrentAdapter(_adapter);
