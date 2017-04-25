@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+    <TableRow>
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:id="@+id/newDirectoryBtn"
+            android:text="Nowy folder"
+            android:layout_weight="0.5" />
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:text="Example"
+            android:layout_weight="0.5" />
+        <Button
+            android:layout_width="0dip"
+            android:id="@+id/changeSourceBtn"
+            android:layout_height="match_parent"
+            android:text="Example"
+            android:layout_weight="0.5" />
+    </TableRow>
+</TableLayout>

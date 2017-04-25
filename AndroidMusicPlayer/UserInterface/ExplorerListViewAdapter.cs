@@ -27,6 +27,16 @@ namespace AndroidMusicPlayer
             _context = context;
         }
 
+        public void UpdateAdapter(ExplorerListViewModel[] explorerList)
+        {
+            _explorerList = explorerList.ToList();
+          this.NotifyDataSetChanged();
+        }
+        public void UpdateAdapter(List<ExplorerListViewModel> explorerList)
+        {
+            _explorerList = explorerList;
+            this.NotifyDataSetChanged();
+        }
         public ExplorerViewAdapter(IEnumerable<ExplorerListViewModel> fileList)
         {
             _explorerList = fileList.ToList();

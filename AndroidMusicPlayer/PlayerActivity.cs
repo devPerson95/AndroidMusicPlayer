@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Android.Animation;
 using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
+using Android.Views.Animations;
 using Android.Widget;
 using Java.Lang;
 using Newtonsoft.Json;
@@ -51,6 +52,7 @@ namespace AndroidMusicPlayer
             _stopBtn.Click += StopBtn_click;
             _player = new Player(file.FullPath);
             _progressBar = FindViewById<ProgressBar>(Resource.Id.progressBar1);
+            
         }
 
         private void Dispose()
@@ -69,21 +71,15 @@ namespace AndroidMusicPlayer
 
         public  void UpdateProgress()
         {
-            
-            new Thread(new Runnable(Update)).Start();
-          
+
+            var animator = ObjectAnimator.OfInt(_progressBar, "progress", 0, 100);
+            animator.SetDuration(_player.GetProgress());
+            animator.Start();
+
+
         }
 
-        public void Update()
-        {
-            while (_player.IsPlaying)
-            {
-
-                _progressBar.Progress = _player.GetProgress();
-
-
-            }
-        }
+        
         public void PauseBtn_click(object sender, EventArgs e)
         {
             _player.Pause();

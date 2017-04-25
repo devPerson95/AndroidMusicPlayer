@@ -65,11 +65,11 @@ namespace AndroidMusicPlayer
 
        public int GetProgress()
        {
-           
-              return ((_player.CurrentPosition * 100) / _player.Duration);
+
+           return _player.Duration;
 
 
-        }
+       }
 
        public void Pause()
        {

@@ -36,38 +36,43 @@ namespace AndroidMusicPlayer
             _fileExplorer = fileExplorer;
             _listView.ItemClick += Item_Click;
             _listView.ItemLongClick += Long_click;
+           
+
         }
 
-        public void Long_click(object sender, AdapterView.ItemLongClickEventArgs e)
+       
+        private void Long_click(object sender, AdapterView.ItemLongClickEventArgs e)
         {
             var itemId = _currentAdapter.GetItemId(e.Position);
             var item = _currentAdapter.GetItemFromId(itemId);
             if (item.IsFile)
             {
-
-                _clickedExplorer = item;
                 _listView.Touch += List_touch;
+                _clickedExplorer = item;
+               
                 FilePreview?.Invoke(_clickedExplorer, true);
                 
             }
         }
+       
 
-        public void List_touch(object sender, View.TouchEventArgs e)
+        private void List_touch(object sender, View.TouchEventArgs e)
         {
             if (e.Event.Action == MotionEventActions.Up)
-                { 
+            {
                 _listView.Touch -= List_touch;
-                if (_clickedExplorer!=null)
+                if (_clickedExplorer != null)
                 {
-                    FilePreview?.Invoke(_clickedExplorer,false);
+                    FilePreview?.Invoke(_clickedExplorer, false);
                 }
-                
+
             }
+            
 
         }
         
 
-        public void Item_Click(object sender, AdapterView.ItemClickEventArgs e)
+        private void Item_Click(object sender, AdapterView.ItemClickEventArgs e)
         {
             var itemId = _currentAdapter.GetItemId(e.Position);
             if (itemId==0)
@@ -92,6 +97,20 @@ namespace AndroidMusicPlayer
         {
             _listView.Adapter = adapter;
             _currentAdapter = adapter;
+        }
+
+        public void UpdateList(List<ExplorerListViewModel> models)
+        {
+            if (_currentAdapter == null)
+            {
+               
+                _currentAdapter = new ExplorerViewAdapter(models);
+                _listView.Adapter = _currentAdapter;
+            }
+            else
+            {
+               _currentAdapter.UpdateAdapter(models);
+            }
         }
 
       

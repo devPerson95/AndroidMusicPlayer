@@ -114,7 +114,7 @@ namespace AndroidMusicPlayer.Manager
 
                var directories = directoryInfo.EnumerateDirectories();
                 var items=new List<ExplorerListViewModel>();
-                Parallel.ForEach(directories,(director)=>
+               foreach (var director in directories)
                {
                    items.Add(new ExplorerListViewModel
                    {
@@ -125,9 +125,8 @@ namespace AndroidMusicPlayer.Manager
 
                    });
                    _id++;
-               })
-               ;
-              
+               }
+
                return items;
            }
            else
@@ -144,8 +143,9 @@ namespace AndroidMusicPlayer.Manager
                
                 var items =new List<ExplorerListViewModel>();
                var files = directoryInfo.EnumerateFiles();
-               Parallel.ForEach(files, file =>
+               foreach (var file in files)
                {
+
                    items.Add(new ExplorerListViewModel
                    {
                        FullPath = file.FullName,
@@ -154,8 +154,8 @@ namespace AndroidMusicPlayer.Manager
                        IsFile = true
                    });
                    _id++;
-               });
-               
+               }
+
                return items;
            }
            else
