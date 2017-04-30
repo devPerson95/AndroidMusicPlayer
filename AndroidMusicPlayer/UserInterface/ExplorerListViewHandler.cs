@@ -15,7 +15,7 @@ using Java.Util;
 
 namespace AndroidMusicPlayer
 {
-    public class ExplorerListView
+    public class ExplorerListViewHandler
     {
         private ListView _listView;
         private ExplorerViewAdapter _currentAdapter;
@@ -29,7 +29,7 @@ namespace AndroidMusicPlayer
         public event FilePreviewDelegate FilePreview;
         
 
-        public ExplorerListView(ListView listView,FileExplorer fileExplorer)
+        public ExplorerListViewHandler(ListView listView,FileExplorer fileExplorer)
         {
             
             _listView = listView;
@@ -99,7 +99,7 @@ namespace AndroidMusicPlayer
             _currentAdapter = adapter;
         }
 
-        public void UpdateList(List<ExplorerListViewModel> models)
+        public void Update(List<ExplorerListViewModel> models)
         {
             if (_currentAdapter == null)
             {

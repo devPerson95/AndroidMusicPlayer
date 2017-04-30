@@ -13,7 +13,7 @@ using System.IO;
 
 namespace AndroidMusicPlayer
 {
-    public class IOHandler
+    public class StorageHandler
     {
         public void AddDirectory(string path)
         {
@@ -36,5 +36,6 @@ namespace AndroidMusicPlayer
             dir.Mkdir();
 
         }
+
     }
 }

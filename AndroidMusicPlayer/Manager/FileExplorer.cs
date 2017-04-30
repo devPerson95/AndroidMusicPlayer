@@ -164,6 +164,14 @@ namespace AndroidMusicPlayer.Manager
            }
        }
 
+       public void SetAnotherStarPath(string path)
+       {
+           _pathHistory=new List<string>();
+           _path = path;
+            _pathHistory.Add(path);
+           IsStartDirectory = true;
+           _id = 0;
+       }
      
 
     }

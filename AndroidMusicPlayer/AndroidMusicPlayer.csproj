@@ -16,7 +16,7 @@
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -53,9 +53,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IOHandler.cs" />
+    <Compile Include="StorageHandler.cs" />
     <Compile Include="PlayerActivity.cs" />
-    <Compile Include="UserInterface\ExplorerListView.cs" />
+    <Compile Include="UserInterface\ExplorerListViewHandler.cs" />
     <Compile Include="Manager\FileExplorer.cs" />
     <Compile Include="Models\ExplorerListViewModel.cs" />
     <Compile Include="UserInterface\ExplorerListViewAdapter.cs" />

@@ -32,7 +32,7 @@ namespace AndroidMusicPlayer
         private Button _internalStorageBtn;
         private Button _externalStorageBtn;
         private ListView _listView;
-        private ExplorerListView _explorerList;
+        private ExplorerListViewHandler _explorerListHandler;
         private FileExplorer _fileExplorer;
         private ExplorerViewAdapter _adapter;
         private LinearLayout _layout;
@@ -41,6 +41,7 @@ namespace AndroidMusicPlayer
         private Button _changeSource;
         private Button _newDirectory;
         private bool _isExternal;
+        private string _currentPath;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -71,13 +72,7 @@ namespace AndroidMusicPlayer
             _layout = FindViewById<LinearLayout>(Resource.Id.MainLayout);
             _internalStorageBtn.Click += InternalStorageButton_Click;
             _externalStorageBtn.Click += ExternalStorageButton_Click;
-            _listView = new ListView(this, null, Android.Resource.Layout.SimpleListItem1);
-            
             _fileExplorer = new FileExplorer();
-            _explorerList = new ExplorerListView(_listView, _fileExplorer);
-           
-
-
 
         }
 
@@ -134,97 +129,107 @@ namespace AndroidMusicPlayer
 
         protected void InternalStorageButton_Click(object sender, EventArgs e)
         {
-           OpenInternalStorage();
-            _isExternal = false;
+            try
+            {
+
+                var startPath = GetInternalStorage();
+                RemoveStartMenu();
+                CreateExplorerMenu("Pamięć zewnętrzna");
+                CreateListView();
+                Refresh(startPath);
+
+            }
+            catch (Exception)
+            {
+                Toast.MakeText(this, "Wystąpił nie oczekiwany błąd", ToastLength.Long).Show();
+                
+
+            }
         }
 
         protected void ExternalStorageButton_Click(object sender, EventArgs e)
         {
-           
-            OpenExternalStorage();
-            _isExternal = true;
 
-        }
-
-        private void OpenInternalStorage()
-        {
-            var startPath = GetInternalStorage();
-            _fileExplorer.Path = startPath;
-            CallbackFileExplorer();
-            _progressBar = new ProgressBar(this, null, Android.Resource.Attribute.ProgressBarStyleSmall);
-            _layout.AddView(_progressBar);
-            var menuLayout = LayoutInflater.From(this).Inflate(Resource.Layout.ExplorerMenu, null, false);
-            _layout.AddView(menuLayout);
-            if (_changeSource==null)
-            {
-                _changeSource = FindViewById<Button>(Resource.Id.changeSourceBtn);
-                _changeSource.Click += ChangeSourceBtn_Click;
-            }
-           
-            _changeSource.SetText("Pamięć zewnętrzna", TextView.BufferType.Normal);
-            
-        }
-        private void OpenExternalStorage()
-        {
             try
             {
-                var startPath = GetExternalStorage();
-                _fileExplorer.Path = startPath;
-                CallbackFileExplorer();
-                _progressBar = new ProgressBar(this, null, Android.Resource.Attribute.ProgressBarStyleSmall);
-                _layout.AddView(_progressBar);
-                var menuLayout = LayoutInflater.From(this).Inflate(Resource.Layout.ExplorerMenu, null, false);
-                _layout.AddView(menuLayout);
-                if (_changeSource == null)
-                {
-                    _changeSource = FindViewById<Button>(Resource.Id.changeSourceBtn);
-                    _changeSource.Click += ChangeSourceBtn_Click;
-                }
-                _changeSource.SetText("Pamięć wewnętrzna", TextView.BufferType.Normal);
                 
+                var startPath = GetExternalStorage();
+                RemoveStartMenu();
+                CreateExplorerMenu("Pamięć wewnętrzna");
+                CreateListView();
+                Refresh(startPath);
+                _isExternal = true;
             }
             catch (Exception)
             {
                 Toast.MakeText(this, "Urządzenie nie posiada pamięci zewnętrznej", ToastLength.Long).Show();
-                if (_externalStorageBtn!=null)
+                if (_externalStorageBtn != null)
                 {
                     _externalStorageBtn.Click -= ExternalStorageButton_Click;
                     _layout.RemoveView(_externalStorageBtn);
                 }
-                
-            }
-        }
-        public async  void CallbackFileExplorer()
-        {
 
-            var itemFile = _fileExplorer.GetFileAsync();
-            var items = await _fileExplorer.GetDirectoryAsync();
-            items.AddRange(await itemFile);
-            if (_externalStorageBtn!=null && _internalStorageBtn!=null)
-            {
-                _internalStorageBtn.Click -= InternalStorageButton_Click;
-                _externalStorageBtn.Click -= ExternalStorageButton_Click;
-                _layout.RemoveView(_internalStorageBtn);
-                _internalStorageBtn.Dispose();
-                _layout.RemoveView(_externalStorageBtn);
-                _externalStorageBtn.Dispose();
             }
-           
-            _layout.RemoveView(_progressBar);
-            _progressBar.Dispose();
-            _layout.AddView(_listView, new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, _layout.Height-200));
-            _adapter = new ExplorerViewAdapter(this,  items.ToArray());
-            _explorerList.SetCurrentAdapter(_adapter);
-            _explorerList.DirectoryClick += Directory_click;
-            _explorerList.FileClick += File_click;
-            _explorerList.FilePreview += FilePreview;
+
+        }
+
+       
+
+        public void CreateExplorerMenu(string sourceBtnText)
+        {
+            var menuLayout = LayoutInflater.From(this).Inflate(Resource.Layout.ExplorerMenu, null, false);
+            _layout.AddView(menuLayout);
+            _changeSource = FindViewById<Button>(Resource.Id.changeSourceBtn);
+            _changeSource.Click += ChangeSourceBtn_Click;
+            _changeSource.SetText(sourceBtnText, TextView.BufferType.Normal);
             _newDirectory = FindViewById<Button>(Resource.Id.newDirectoryBtn);
             _newDirectory.Click += NewDirectoryBtn_Click;
-           
         }
 
+        public void CreateListView()
+        {
+            _listView = new ListView(this, null, Android.Resource.Layout.SimpleListItem1);
+            _layout.AddView(_listView,
+                new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, _layout.Height - 200));
+            _explorerListHandler = new ExplorerListViewHandler(_listView, _fileExplorer);
+            _explorerListHandler.DirectoryClick += Directory_click;
+            _explorerListHandler.FileClick += File_click;
+            _explorerListHandler.FilePreview += FilePreview;
+        }
+        public void RemoveStartMenu()
+        {
+            _internalStorageBtn.Click -= InternalStorageButton_Click;
+            _externalStorageBtn.Click -= ExternalStorageButton_Click;
+            _layout.RemoveView(_internalStorageBtn);
+            _internalStorageBtn.Dispose();
+            _layout.RemoveView(_externalStorageBtn);
+            _externalStorageBtn.Dispose();
+        }
         public void ChangeSourceBtn_Click(object sender, EventArgs e)
         {
+            try
+            {
+                string path;
+                if (_isExternal)
+                {
+                    path = GetInternalStorage();
+                    _changeSource.Text = "Pamięć zewnętrzna";
+                    _isExternal = false;
+                }
+                else
+                {
+                    path = GetExternalStorage();
+                    _changeSource.Text = "Pamięć wewnętrzna";
+                    _isExternal = true;
+                }
+                _fileExplorer.SetAnotherStarPath(path);
+                Refresh(path);
+            }
+            catch (Exception)
+            {
+
+                _changeSource.Enabled = false;
+            }
             
         }
         public void NewDirectoryBtn_Click(object sender, EventArgs e)
@@ -236,7 +241,7 @@ namespace AndroidMusicPlayer
             alertBox.SetView(textBox);
             alertBox.SetPositiveButton("Utwórz", (object senderAlert, DialogClickEventArgs eve) =>
             {
-                var ioHandler=new IOHandler();
+                var ioHandler=new StorageHandler();
                 ioHandler.AddDirectory(Path.Combine(_fileExplorer.Path,textBox.Text));
               Toast.MakeText(this, textBox.Text,ToastLength.Short).Show();
             });
@@ -246,21 +251,34 @@ namespace AndroidMusicPlayer
 
 
         }
-        
-        
-        public async void Directory_click(ExplorerListViewModel item)
-        {   List<ExplorerListViewModel> listView=new List<ExplorerListViewModel>();
-            _fileExplorer.Path = item.FullPath;
+
+        public async void Refresh(string path)
+        {
+            _fileExplorer.Path = path;
+            List<ExplorerListViewModel> listView = new List<ExplorerListViewModel>();
+
             if (!_fileExplorer.IsStartDirectory)
             {
                 listView.Add(_fileExplorer.GetPreviousDirectory());
             }
-            
+           
+
             listView.AddRange(await _fileExplorer.GetDirectoryAsync());
             listView.AddRange(await _fileExplorer.GetFileAsync());
-            
-            _explorerList.UpdateList(listView);
-            
+            if (_adapter==null)
+            {
+                var explorerAdapter=new ExplorerViewAdapter(this,listView.ToArray());
+                _explorerListHandler.SetCurrentAdapter(explorerAdapter);
+            }
+
+            _explorerListHandler.Update(listView);
+        }
+        
+        public  void Directory_click(ExplorerListViewModel item)
+        {   
+            _currentPath = item.FullPath;
+            Refresh(_currentPath);
+
         }
 
         public void FilePreview(ExplorerListViewModel item,bool play)
