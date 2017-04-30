@@ -27,7 +27,8 @@ namespace AndroidMusicPlayer
         public event ItemDelegate FileClick;
         public event ItemDelegate DirectoryClick;
         public event FilePreviewDelegate FilePreview;
-        
+        float previousX = 0;
+        float previousY = 0;
 
         public ExplorerListViewHandler(ListView listView,FileExplorer fileExplorer)
         {
@@ -67,7 +68,15 @@ namespace AndroidMusicPlayer
                 }
 
             }
+            float startX = e.Event.RawX;
+            float startY = e.Event.RawY;
             
+            if (previousX-startX>100 && previousY-startY<100)
+            {
+                previousY = 1;
+            }
+            previousX = startX;
+            previousY = startY;
 
         }
         

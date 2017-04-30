@@ -37,5 +37,20 @@ namespace AndroidMusicPlayer
 
         }
 
+        public void DeleteItem(string path)
+        {
+            
+            var item=new Java.IO.File(path);
+            if (item.Exists() && item.CanExecute())
+            {
+                item.Delete();
+            }
+            else
+            {
+                throw new Exception();
+            }
+           
+        }
+
     }
 }

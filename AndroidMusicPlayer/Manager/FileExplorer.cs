@@ -26,21 +26,7 @@ namespace AndroidMusicPlayer.Manager
        public string Path
        {
            get { return _path; }
-           set
-           {
-               if (!value.Equals(_pathHistory.LastOrDefault()))
-               {
-                   
-                    _pathHistory.Add(value);
-                    if (_pathHistory.Count > 1)
-                    {
-                        IsStartDirectory = false;
-                    }
-                }
-               
-               _path = value;
-               _id = 1;
-           }
+           set { _path = value; }
        }
         public FileExplorer(string startPath)
         {
@@ -60,6 +46,22 @@ namespace AndroidMusicPlayer.Manager
             _id = 0;
         }
 
+       public void SetPath(string path)
+       {
+            if (!path.Equals(_pathHistory.LastOrDefault()))
+            {
+
+                _pathHistory.Add(path);
+                if (_pathHistory.Count > 1)
+                {
+                    IsStartDirectory = false;
+                }
+            }
+
+            _path = path;
+            _id = 1;
+        }
+    
        public Task<List<ExplorerListViewModel>> GetDirectoryAsync()
        {
            return Task.Factory.StartNew(() => GetDirectory());

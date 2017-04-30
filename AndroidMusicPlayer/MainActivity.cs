@@ -36,7 +36,6 @@ namespace AndroidMusicPlayer
         private FileExplorer _fileExplorer;
         private ExplorerViewAdapter _adapter;
         private LinearLayout _layout;
-        private ProgressBar _progressBar;
         private Player _player;
         private Button _changeSource;
         private Button _newDirectory;
@@ -254,7 +253,7 @@ namespace AndroidMusicPlayer
 
         public async void Refresh(string path)
         {
-            _fileExplorer.Path = path;
+            _fileExplorer.SetPath(path);
             List<ExplorerListViewModel> listView = new List<ExplorerListViewModel>();
 
             if (!_fileExplorer.IsStartDirectory)
@@ -267,8 +266,8 @@ namespace AndroidMusicPlayer
             listView.AddRange(await _fileExplorer.GetFileAsync());
             if (_adapter==null)
             {
-                var explorerAdapter=new ExplorerViewAdapter(this,listView.ToArray());
-                _explorerListHandler.SetCurrentAdapter(explorerAdapter);
+                _adapter=new ExplorerViewAdapter(this,listView.ToArray());
+                _explorerListHandler.SetCurrentAdapter(_adapter);
             }
 
             _explorerListHandler.Update(listView);
