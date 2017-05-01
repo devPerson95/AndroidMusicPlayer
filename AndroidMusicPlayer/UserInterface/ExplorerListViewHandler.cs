@@ -27,8 +27,13 @@ namespace AndroidMusicPlayer
         public event ItemDelegate FileClick;
         public event ItemDelegate DirectoryClick;
         public event FilePreviewDelegate FilePreview;
-        float previousX = 0;
-        float previousY = 0;
+        public event ItemDelegate ItemSlideRight;
+
+        private float startX = 0;
+        private float startY = 0;
+        private bool _initialTouch;
+        private bool _isSlideInvoke;
+
 
         public ExplorerListViewHandler(ListView listView,FileExplorer fileExplorer)
         {
@@ -37,7 +42,7 @@ namespace AndroidMusicPlayer
             _fileExplorer = fileExplorer;
             _listView.ItemClick += Item_Click;
             _listView.ItemLongClick += Long_click;
-           
+          
 
         }
 
@@ -46,38 +51,55 @@ namespace AndroidMusicPlayer
         {
             var itemId = _currentAdapter.GetItemId(e.Position);
             var item = _currentAdapter.GetItemFromId(itemId);
+            _clickedExplorer = item;
+            _listView.Touch += List_touch;
+            _initialTouch = true;
             if (item.IsFile)
             {
-                _listView.Touch += List_touch;
-                _clickedExplorer = item;
-               
+
                 FilePreview?.Invoke(_clickedExplorer, true);
                 
             }
+
         }
        
 
         private void List_touch(object sender, View.TouchEventArgs e)
         {
+            if (_initialTouch)
+            {
+               startX = e.Event.RawX;
+               startY = e.Event.RawY;
+            }
             if (e.Event.Action == MotionEventActions.Up)
             {
-                _listView.Touch -= List_touch;
-                if (_clickedExplorer != null)
+               
+                if (_clickedExplorer != null && _clickedExplorer.IsFile)
                 {
                     FilePreview?.Invoke(_clickedExplorer, false);
+                   
+                }
+                _listView.Touch -= List_touch;
+                _isSlideInvoke = false;
+             
+
+            }
+            _initialTouch = false;
+            var currentX= e.Event.RawX;
+            var currentY = e.Event.RawY;
+
+            if (currentX-startX>100 && currentY-startY<100)
+            {
+                if (!_isSlideInvoke)
+                {
+                    _isSlideInvoke = true;
+                    ItemSlideRight?.Invoke(_clickedExplorer);
+                    
                 }
 
             }
-            float startX = e.Event.RawX;
-            float startY = e.Event.RawY;
-            
-            if (previousX-startX>100 && previousY-startY<100)
-            {
-                previousY = 1;
-            }
-            previousX = startX;
-            previousY = startY;
-
+           
+           
         }
         
 

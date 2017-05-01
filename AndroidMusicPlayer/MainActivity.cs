@@ -138,7 +138,7 @@ namespace AndroidMusicPlayer
                 Refresh(startPath);
 
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 Toast.MakeText(this, "Wystąpił nie oczekiwany błąd", ToastLength.Long).Show();
                 
@@ -146,6 +146,26 @@ namespace AndroidMusicPlayer
             }
         }
 
+        public void ItemSlideRight(ExplorerListViewModel item)
+        {
+
+            var alertBox = new AlertDialog.Builder(this)
+                .SetTitle("Usuń")
+                .SetMessage(String.Format("Czy chcesz usunąć {0}?", item.Name))
+                .SetPositiveButton("Usuń", (object sender, DialogClickEventArgs e) =>
+                {
+                    var ioHandler = new StorageHandler();
+                   ioHandler.DeleteItem(item.FullPath);
+                    Toast.MakeText(this, string.Format("Usunięto {0}!",item.Name), ToastLength.Short).Show();
+                    Refresh();
+                })
+                .SetNegativeButton("Anuluj", (object sender, DialogClickEventArgs e) =>
+                {
+
+                });
+            var dialog = alertBox.Create();
+            dialog.Show();
+        }
         protected void ExternalStorageButton_Click(object sender, EventArgs e)
         {
 
@@ -194,6 +214,7 @@ namespace AndroidMusicPlayer
             _explorerListHandler.DirectoryClick += Directory_click;
             _explorerListHandler.FileClick += File_click;
             _explorerListHandler.FilePreview += FilePreview;
+            _explorerListHandler.ItemSlideRight += ItemSlideRight;
         }
         public void RemoveStartMenu()
         {
@@ -243,6 +264,7 @@ namespace AndroidMusicPlayer
                 var ioHandler=new StorageHandler();
                 ioHandler.AddDirectory(Path.Combine(_fileExplorer.Path,textBox.Text));
               Toast.MakeText(this, textBox.Text,ToastLength.Short).Show();
+                Refresh();
             });
             alertBox.SetNegativeButton("Anuluj", (object senderAlert, DialogClickEventArgs eve) => { });
             var dialog = alertBox.Create();
@@ -272,7 +294,28 @@ namespace AndroidMusicPlayer
 
             _explorerListHandler.Update(listView);
         }
-        
+        public async void Refresh()
+        {
+            
+            List<ExplorerListViewModel> listView = new List<ExplorerListViewModel>();
+
+            if (!_fileExplorer.IsStartDirectory)
+            {
+                listView.Add(_fileExplorer.GetPreviousDirectory());
+            }
+
+
+            listView.AddRange(await _fileExplorer.GetDirectoryAsync());
+            listView.AddRange(await _fileExplorer.GetFileAsync());
+            if (_adapter == null)
+            {
+                _adapter = new ExplorerViewAdapter(this, listView.ToArray());
+                _explorerListHandler.SetCurrentAdapter(_adapter);
+            }
+
+            _explorerListHandler.Update(listView);
+        }
+
         public  void Directory_click(ExplorerListViewModel item)
         {   
             _currentPath = item.FullPath;
