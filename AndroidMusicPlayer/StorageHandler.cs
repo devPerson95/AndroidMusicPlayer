@@ -10,6 +10,9 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using System.IO;
+using System.IO.IsolatedStorage;
+using Android;
+using Java.IO;
 
 namespace AndroidMusicPlayer
 {
@@ -17,6 +20,7 @@ namespace AndroidMusicPlayer
     {
         public void AddDirectory(string path)
         {
+           
             string directorPath = path;
             DirectoryInfo directoryInfo = new DirectoryInfo(directorPath);
             int index = 0;
@@ -33,8 +37,16 @@ namespace AndroidMusicPlayer
             }
             
             var dir = new Java.IO.File(directorPath);
-            dir.Mkdir();
-
+            
+            var status= dir.Mkdirs();
+            if (!status)
+            {
+               
+                throw new Exception("Nie mo¿na utworzyæ folderu");
+            }
+            
+           
+           
         }
 
         public void DeleteItem(string path)
@@ -44,6 +56,7 @@ namespace AndroidMusicPlayer
             if (item.Exists() && item.CanExecute())
             {
                 item.Delete();
+               
             }
             else
             {

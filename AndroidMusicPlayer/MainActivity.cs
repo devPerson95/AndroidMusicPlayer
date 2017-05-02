@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Android;
 using Android.Animation;
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.Content.Res;
 using Android.Runtime;
 using Android.Views;
@@ -14,6 +16,7 @@ using Android.Widget;
 using Android.OS;
 using Android.Util;
 using AndroidMusicPlayer.Manager;
+using Java.IO;
 using Java.Lang;
 using Newtonsoft.Json;
 using Java.Util;
@@ -72,9 +75,20 @@ namespace AndroidMusicPlayer
             _internalStorageBtn.Click += InternalStorageButton_Click;
             _externalStorageBtn.Click += ExternalStorageButton_Click;
             _fileExplorer = new FileExplorer();
+            CheckPermission();
+           
 
         }
 
+        public void CheckPermission()
+        {
+
+            var permision = CheckSelfPermission(Manifest.Permission.WriteExternalStorage);
+            if (permision != Permission.Granted)
+            {
+                RequestPermissions(new string[] {Manifest.Permission_group.Storage}, 0);
+            }
+        }
 
         private void Dispose()
         {
@@ -105,6 +119,7 @@ namespace AndroidMusicPlayer
 
         public string GetExternalStorage()
         {
+
             var storages = GetExternalFilesDirs(null);
             if (storages != null && storages.Count() > 1)
             {
@@ -124,6 +139,7 @@ namespace AndroidMusicPlayer
             {
                 throw new System.Exception();
             }
+
         }
 
         protected void InternalStorageButton_Click(object sender, EventArgs e)
@@ -141,7 +157,7 @@ namespace AndroidMusicPlayer
             catch (Exception exception)
             {
                 Toast.MakeText(this, "Wystąpił nie oczekiwany błąd", ToastLength.Long).Show();
-                
+
 
             }
         }
@@ -155,8 +171,8 @@ namespace AndroidMusicPlayer
                 .SetPositiveButton("Usuń", (object sender, DialogClickEventArgs e) =>
                 {
                     var ioHandler = new StorageHandler();
-                   ioHandler.DeleteItem(item.FullPath);
-                    Toast.MakeText(this, string.Format("Usunięto {0}!",item.Name), ToastLength.Short).Show();
+                    ioHandler.DeleteItem(item.FullPath);
+                    Toast.MakeText(this, string.Format("Usunięto {0}!", item.Name), ToastLength.Short).Show();
                     Refresh();
                 })
                 .SetNegativeButton("Anuluj", (object sender, DialogClickEventArgs e) =>
@@ -166,12 +182,13 @@ namespace AndroidMusicPlayer
             var dialog = alertBox.Create();
             dialog.Show();
         }
+
         protected void ExternalStorageButton_Click(object sender, EventArgs e)
         {
 
             try
             {
-                
+
                 var startPath = GetExternalStorage();
                 RemoveStartMenu();
                 CreateExplorerMenu("Pamięć wewnętrzna");
@@ -192,7 +209,7 @@ namespace AndroidMusicPlayer
 
         }
 
-       
+
 
         public void CreateExplorerMenu(string sourceBtnText)
         {
@@ -211,11 +228,13 @@ namespace AndroidMusicPlayer
             _layout.AddView(_listView,
                 new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, _layout.Height - 200));
             _explorerListHandler = new ExplorerListViewHandler(_listView, _fileExplorer);
+            _explorerListHandler.Context = this;
             _explorerListHandler.DirectoryClick += Directory_click;
             _explorerListHandler.FileClick += File_click;
             _explorerListHandler.FilePreview += FilePreview;
             _explorerListHandler.ItemSlideRight += ItemSlideRight;
         }
+
         public void RemoveStartMenu()
         {
             _internalStorageBtn.Click -= InternalStorageButton_Click;
@@ -225,6 +244,7 @@ namespace AndroidMusicPlayer
             _layout.RemoveView(_externalStorageBtn);
             _externalStorageBtn.Dispose();
         }
+
         public void ChangeSourceBtn_Click(object sender, EventArgs e)
         {
             try
@@ -250,25 +270,38 @@ namespace AndroidMusicPlayer
 
                 _changeSource.Enabled = false;
             }
-            
+
         }
+
         public void NewDirectoryBtn_Click(object sender, EventArgs e)
         {
+
             var alertBox = new AlertDialog.Builder(this);
             alertBox.SetTitle("Utwórz nowy folder");
             alertBox.SetMessage("Podaj nazwę folderu");
-            var textBox=new EditText(this) {Text = "Nowy folder"};
+            var textBox = new EditText(this) {Text = "Nowy folder"};
             alertBox.SetView(textBox);
             alertBox.SetPositiveButton("Utwórz", (object senderAlert, DialogClickEventArgs eve) =>
             {
-                var ioHandler=new StorageHandler();
-                ioHandler.AddDirectory(Path.Combine(_fileExplorer.Path,textBox.Text));
-              Toast.MakeText(this, textBox.Text,ToastLength.Short).Show();
-                Refresh();
+                try
+                {
+                    var ioHandler = new StorageHandler();
+                    ioHandler.AddDirectory(Path.Combine(_fileExplorer.Path, textBox.Text));
+                    Toast.MakeText(this, textBox.Text, ToastLength.Short).Show();
+                    Refresh();
+                }
+                catch (Exception)
+                {
+
+                    Toast.MakeText(this, "Nie można utworzyć folderu w tej lokalizacji!", ToastLength.Short).Show();
+                }
             });
-            alertBox.SetNegativeButton("Anuluj", (object senderAlert, DialogClickEventArgs eve) => { });
-            var dialog = alertBox.Create();
-            dialog.Show();
+                alertBox.SetNegativeButton("Anuluj", (object senderAlert, DialogClickEventArgs eve) => { });
+                var dialog = alertBox.Create();
+                dialog.Show();
+            
+            
+           
 
 
         }
