@@ -119,7 +119,7 @@ namespace AndroidMusicPlayer
 
         public string GetExternalStorage()
         {
-
+           
             var storages = GetExternalFilesDirs(null);
             if (storages != null && storages.Count() > 1)
             {
@@ -286,7 +286,7 @@ namespace AndroidMusicPlayer
                 try
                 {
                     var ioHandler = new StorageHandler();
-                    ioHandler.AddDirectory(Path.Combine(_fileExplorer.Path, textBox.Text));
+                   ioHandler.AddDirectory(Path.Combine(_fileExplorer.Path, textBox.Text));
                     Toast.MakeText(this, textBox.Text, ToastLength.Short).Show();
                     Refresh();
                 }

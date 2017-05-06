@@ -37,7 +37,8 @@ namespace AndroidMusicPlayer
         private float startY = 0;
         private bool _initialTouch;
         private bool _isSlideInvoke;
-        private int itemLongClickPos;
+        private bool _isItemMoved;
+      
 
         public Context Context { get; set; }
 
@@ -47,8 +48,7 @@ namespace AndroidMusicPlayer
             _listView = listView;
             _fileExplorer = fileExplorer;
             _listView.ItemClick += Item_Click;
-            _listView.ItemLongClick += Long_click;
-
+            _listView.Touch += List_touch;
 
         }
 
@@ -58,7 +58,7 @@ namespace AndroidMusicPlayer
             var itemId = _currentAdapter.GetItemId(e.Position);
             var item = _currentAdapter.GetItemFromId(itemId);
             _clickedExplorer = item;
-            _listView.Touch += List_touch;
+           
             _initialTouch = true;
             itemLongClickPos = e.Position;
             if (item.IsFile)
@@ -73,51 +73,89 @@ namespace AndroidMusicPlayer
 
         private void List_touch(object sender, View.TouchEventArgs e)
         {
-            if (_initialTouch)
+            var child = _listView.GetChildAt(0);
+            var height = child.Height;
+            var scroll = -child.Top + _listView.FirstVisiblePosition*height;
+            var point = _listView.PointToPosition((int)e.Event.GetX(),(int) e.Event.GetY());
+            var  itemView = _listView.GetChildAt(point-scroll/height);
+           
+            if (e.Event.Action == MotionEventActions.Down)
             {
                 startX = e.Event.RawX;
                 startY = e.Event.RawY;
                 _isSlideInvoke = false;
+                _isItemMoved = false;
             }
-            var currentX = e.Event.RawX;
-            var currentY = e.Event.RawY;
-            var slide = currentX - startX;
-
-
-            var itemView = _listView.GetChildAt(itemLongClickPos);
-            itemView.SetPadding((int)slide, 0, 0, 0);
-
-
-
-
+            
 
             if (e.Event.Action == MotionEventActions.Up)
             {
-                itemView.SetPadding(0, 0, 0, 0);
+                
+                if (itemView!=null)
+                {
+                    itemView.SetPadding(0, 0, 0, 0);
+                }
+                
                 if (_clickedExplorer != null && _clickedExplorer.IsFile)
                 {
-                    FilePreview?.Invoke(_clickedExplorer, false);
+                    
+                  //  FilePreview?.Invoke(item, false);
 
                    
                 }
-                _listView.Touch -= List_touch;
                 
-             
-
+                
+                
             }
-            _initialTouch = false;
-
-            if (currentX - startX > 400 && currentY - startY < 400)
+            
+            if (e.Event.Action == MotionEventActions.Move )
             {
-                if (!_isSlideInvoke)
+                
+               
+                var currentX = e.Event.RawX;
+                var currentY = e.Event.RawY;
+                var slide = currentX - startX;
+                _isItemMoved = true;
+
+                if (currentY - startY < 50 && startY - currentY < 50)
                 {
-                    _isSlideInvoke = true;
-                  
-                    ItemSlideRight?.Invoke(_clickedExplorer);
-                   
+                    if (itemView != null)
+                    {
+                        itemView.SetPadding((int)slide, 0, 0, 0);
+                    }
+                    if (currentX - startX > 400)
+                    {
+
+                        if (!_isSlideInvoke)
+                        {
+                            _isSlideInvoke = true;
+                            var id = _currentAdapter.GetItemId(point);
+                            var item = _currentAdapter.GetItemFromId(id);
+
+                            ItemSlideRight?.Invoke(item);
+
+                        }
+
+                    }
+                    
+                }
+                else
+                {
+                    if (itemView != null)
+                    {
+                        itemView.SetPadding(0, 0, 0, 0);
+                    }
                 }
 
+                e.Handled = true;
+
+
             }
+
+
+            e.Handled = false;
+
+
 
         }
         
@@ -133,7 +171,7 @@ namespace AndroidMusicPlayer
             if (item.IsFile)
             {
               
-                //FileClick?.Invoke(item);
+                FileClick?.Invoke(item);
                 
                 
                

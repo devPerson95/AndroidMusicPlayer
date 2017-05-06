@@ -20,33 +20,34 @@ namespace AndroidMusicPlayer
     {
         public void AddDirectory(string path)
         {
-           
+
             string directorPath = path;
             DirectoryInfo directoryInfo = new DirectoryInfo(directorPath);
             int index = 0;
-               
+
 
             while (directoryInfo.Exists)
             {
-                    index++;
-                    directoryInfo = new DirectoryInfo(directorPath+index);
-             }
-            if (index!=0)
+                index++;
+                directoryInfo = new DirectoryInfo(directorPath + index);
+            }
+            if (index != 0)
             {
                 directorPath += index;
             }
-            
+
             var dir = new Java.IO.File(directorPath);
-            
-            var status= dir.Mkdirs();
+
+            var status = dir.Mkdirs();
             if (!status)
             {
-               
+
                 throw new Exception("Nie mo¿na utworzyæ folderu");
             }
-            
-           
-           
+
+
+
+
         }
 
         public void DeleteItem(string path)
