@@ -42,9 +42,10 @@ namespace AndroidMusicPlayer
         private Player _player;
         private Button _changeSource;
         private Button _newDirectory;
+        private Button _editMode;
         private bool _isExternal;
         private string _currentPath;
-
+        private bool _isEditMode;
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -92,7 +93,7 @@ namespace AndroidMusicPlayer
 
         private void Dispose()
         {
-            _listView.Dispose();
+           
             _layout.Dispose();
             if (_player != null)
             {
@@ -220,8 +221,25 @@ namespace AndroidMusicPlayer
             _changeSource.SetText(sourceBtnText, TextView.BufferType.Normal);
             _newDirectory = FindViewById<Button>(Resource.Id.newDirectoryBtn);
             _newDirectory.Click += NewDirectoryBtn_Click;
+            _editMode = FindViewById<Button>(Resource.Id.editModeBtn);
+            _editMode.Click += EditModeBtn_click;
+
         }
 
+        public void EditModeBtn_click(object sender, EventArgs e)
+        {
+            if (!_isEditMode)
+            {
+                _explorerListHandler.EditModeEnabled();
+                _isEditMode = true;
+            }
+            else
+            {
+                _explorerListHandler.EditModeDisabled();
+                _isEditMode = false;
+            }
+            
+        }
         public void CreateListView()
         {
             _listView = new ListView(this, null, Android.Resource.Layout.SimpleListItem1);
@@ -231,7 +249,6 @@ namespace AndroidMusicPlayer
             _explorerListHandler.Context = this;
             _explorerListHandler.DirectoryClick += Directory_click;
             _explorerListHandler.FileClick += File_click;
-            _explorerListHandler.FilePreview += FilePreview;
             _explorerListHandler.ItemSlideRight += ItemSlideRight;
         }
 
@@ -355,34 +372,6 @@ namespace AndroidMusicPlayer
             Refresh(_currentPath);
 
         }
-
-        public void FilePreview(ExplorerListViewModel item,bool play)
-        {
-            if (_player==null)
-            {
-                _player = new Player(item.FullPath);
-            }
-            if (!_player.Path.Equals(item.FullPath))
-            {
-                _player.SetPath(item.FullPath);
-            }
-            if (play)
-            {
-                _player.Play();
-                Toast.MakeText(this, "Podgląd aktywny", ToastLength.Short).Show();
-            }
-            else
-            {
-                _player.Stop();
-                Toast.MakeText(this, "Podgląd nieaktywny", ToastLength.Short).Show();
-            }
-           
-            
-        }
-
-        
-
-
         public void File_click(ExplorerListViewModel item)
         {
             Intent playerActivity = new Intent(this, typeof(PlayerActivity));
@@ -391,10 +380,5 @@ namespace AndroidMusicPlayer
             StartActivity(playerActivity);
 
         }
-
-        
-
-
-
     }
 }
