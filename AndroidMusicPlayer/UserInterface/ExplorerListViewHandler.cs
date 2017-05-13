@@ -66,14 +66,14 @@ namespace AndroidMusicPlayer
                 itemView?.SetPadding(0, 0, 0, 0);
             }
             
-            if (e.Event.Action == MotionEventActions.Move && downTime>200 )
+            if (e.Event.Action == MotionEventActions.Move && downTime>300 )
             {
                 
                 var currentX = e.Event.RawX;
                 var currentY = e.Event.RawY;
                 var slide = currentX - _startX;
 
-                if (currentY - _startY < 50 && _startY - currentY < 50)
+                if (currentY - _startY < 100 && _startY - currentY < 100)
                 {
                     
                         itemView?.SetPadding((int)slide, 0, 0, 0);

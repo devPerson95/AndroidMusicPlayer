@@ -46,13 +46,13 @@ namespace AndroidMusicPlayer
         private FileExplorer _fileExplorer;
         private ExplorerViewAdapter _adapter;
         private LinearLayout _layout;
-        private Player _player;
         private Button _changeSource;
         private Button _newDirectory;
         private Button _editMode;
         private bool _isExternal;
         private string _currentPath;
         private bool _isEditMode;
+        private Uri uri;
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -102,10 +102,7 @@ namespace AndroidMusicPlayer
         {
            
             _layout.Dispose();
-            if (_player != null)
-            {
-                _player.Dispose();
-            }
+            
 
         }
 
@@ -140,7 +137,10 @@ namespace AndroidMusicPlayer
                     path = Path.Combine(path, directories[index]);
                     index++;
                 }
-
+                if (uri==null)
+                {
+                    AskForAccess();
+                }
                 return path;
             }
             else
@@ -178,8 +178,14 @@ namespace AndroidMusicPlayer
                 .SetMessage(String.Format("Czy chcesz usunąć {0}?", item.Name))
                 .SetPositiveButton("Usuń", (object sender, DialogClickEventArgs e) =>
                 {
-                    var ioHandler = new StorageHandler();
-                    ioHandler.DeleteItem(item.FullPath);
+                    var storageHandler = new StorageHandler();
+                    var status= storageHandler.DeleteItemFromPath(item.FullPath);
+                    if (!status)
+                    {
+                        var currentDirectory = _fileExplorer.GetCurrenDocumentFile();
+                        storageHandler.DeleteItemFromUri(currentDirectory, item.Name);
+                    }
+                    
                     Toast.MakeText(this, string.Format("Usunięto {0}!", item.Name), ToastLength.Short).Show();
                     Refresh();
                 })
@@ -196,13 +202,7 @@ namespace AndroidMusicPlayer
 
             try
             {
-                int requestCode = 0;
                 var startPath = GetExternalStorage();
-                StorageManager storageManager = (StorageManager)GetSystemService(Context.StorageService);
-                var storageVolume = storageManager.StorageVolumes[1];
-                Intent accessIntent = storageVolume.CreateAccessIntent(null);
-              StartActivityForResult(accessIntent,requestCode);
-             
                 RemoveStartMenu();
                 CreateExplorerMenu("Pamięć wewnętrzna");
                 CreateListView();
@@ -227,11 +227,24 @@ namespace AndroidMusicPlayer
             if (resultCode == Result.Ok)
             {
                 var receivedData = data;
-                var uri = receivedData.Data;
-               DocumentFile documentFile=DocumentFile.FromTreeUri(this,uri);
-               documentFile.CreateDirectory("MojFolder");
+                uri = receivedData.Data;
+                _fileExplorer.SetStarDocumentFileFromUri(uri,this);
+              
 
             }
+        }
+
+        public void AskForAccess()
+        {
+            int requestCode = 0;
+            StorageManager storageManager = (StorageManager)GetSystemService(Context.StorageService);
+            var storageVolume = storageManager.StorageVolumes[1];
+            if (storageVolume!=null)
+            {
+                Intent accessIntent = storageVolume.CreateAccessIntent(null);
+                StartActivityForResult(accessIntent, requestCode);
+            }
+            
         }
 
         public void CreateExplorerMenu(string sourceBtnText)
@@ -325,7 +338,12 @@ namespace AndroidMusicPlayer
                 try
                 {
                     var ioHandler = new StorageHandler();
-                   ioHandler.AddDirectory(Path.Combine(_fileExplorer.Path, textBox.Text));
+                    var status = ioHandler.AddDirectoryFromPath(Path.Combine(_fileExplorer.Path, textBox.Text));
+                    if (!status)
+                    {
+                        var currentDirectoryFile = _fileExplorer.GetCurrenDocumentFile();
+                        ioHandler.AddDirectoryFromUri(currentDirectoryFile,textBox.Text);
+                    }
                     Toast.MakeText(this, textBox.Text, ToastLength.Short).Show();
                     Refresh();
                 }

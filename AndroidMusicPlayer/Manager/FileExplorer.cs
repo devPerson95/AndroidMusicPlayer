@@ -9,10 +9,12 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
+using Android.Support.V4.Provider;
 using Android.Views;
 using Android.Widget;
 using Java.Lang;
 using String = System.String;
+using Uri = Android.Net.Uri;
 
 namespace AndroidMusicPlayer.Manager
 {
@@ -22,8 +24,10 @@ namespace AndroidMusicPlayer.Manager
        private string _path;
        private int _id;
        public bool IsStartDirectory;
+       private DocumentFile _startDocumentFile;
+       private DocumentFile _currentDocumentFile;
 
-       public string Path
+        public string Path
        {
            get { return _path; }
            set { _path = value; }
@@ -46,17 +50,61 @@ namespace AndroidMusicPlayer.Manager
             _id = 0;
         }
 
+       public void SetStarDocumentFileFromUri(Uri uri,Context context)
+       {
+           if (uri!=null && context!=null)
+           {
+               _startDocumentFile = DocumentFile.FromTreeUri(context, uri);
+
+           }
+       }
+
+       public DocumentFile GetCurrenDocumentFile()
+       {
+           if (_currentDocumentFile==null && _startDocumentFile!=null)
+           {
+               return _startDocumentFile;
+           }
+           else
+           {
+               return _currentDocumentFile;
+           }
+       }
+
        public void SetPath(string path)
        {
             if (!path.Equals(_pathHistory.LastOrDefault()))
             {
+                if (_startDocumentFile!=null)
+                {
+                    var splitedPath = path.Split('/');
+                    var directoryName = splitedPath[splitedPath.Length - 1];
+                    if (_currentDocumentFile == null)
+                    {
+                        var nextDirectory = _startDocumentFile.FindFile(directoryName);
+                        if (nextDirectory != null)
+                        {
+                            _currentDocumentFile = nextDirectory;
+                        }
 
+                    }
+                    else
+                    {
+                        var nextDirectory = _currentDocumentFile.FindFile(directoryName);
+                        if (nextDirectory != null)
+                        {
+                            _currentDocumentFile = nextDirectory;
+                        }
+                    }
+
+                }
                 _pathHistory.Add(path);
                 if (_pathHistory.Count > 1)
                 {
                     IsStartDirectory = false;
                 }
             }
+           
 
             _path = path;
             _id = 1;
@@ -74,6 +122,10 @@ namespace AndroidMusicPlayer.Manager
        public void RemoveLastFromHistory()
        {
            _pathHistory.RemoveAt(_pathHistory.Count-1);
+           if (_currentDocumentFile!=null&&_currentDocumentFile!=_startDocumentFile)
+           {
+                _currentDocumentFile = _currentDocumentFile.ParentFile;
+            }
            if (_pathHistory.Count==1)
            {
                IsStartDirectory = true;
@@ -173,6 +225,11 @@ namespace AndroidMusicPlayer.Manager
             _pathHistory.Add(path);
            IsStartDirectory = true;
            _id = 0;
+           if (_currentDocumentFile!=null&& _startDocumentFile!=null)
+           {
+                _currentDocumentFile = _startDocumentFile;
+            }
+           
        }
      
 

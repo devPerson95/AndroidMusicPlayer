@@ -12,13 +12,15 @@ using Android.Widget;
 using System.IO;
 using System.IO.IsolatedStorage;
 using Android;
+using Android.Support.V4.Provider;
 using Java.IO;
+using Uri = Android.Net.Uri;
 
 namespace AndroidMusicPlayer
 {
     public class StorageHandler
     {
-        public void AddDirectory(string path)
+        public bool AddDirectoryFromPath(string path)
         {
 
             string directorPath = path;
@@ -33,37 +35,53 @@ namespace AndroidMusicPlayer
             }
             if (index != 0)
             {
-                directorPath += index;
+                directorPath += String.Format(" ({0})",index);
             }
 
             var dir = new Java.IO.File(directorPath);
 
             var status = dir.Mkdirs();
-            if (!status)
-            {
-
-                throw new Exception("Nie mo¿na utworzyæ folderu");
-            }
-
-
-
-
+            return status;
         }
 
-        public void DeleteItem(string path)
+        public void AddDirectoryFromUri(DocumentFile documentFile,string directoryName)
+        {
+           
+            var name = directoryName;
+            var duplicate=documentFile.FindFile(directoryName);
+            int index = 0;
+            while (duplicate!=null)
+            {
+                index++;
+                duplicate = documentFile.FindFile(name + index);
+            }
+            if (index == 0)
+            {
+                name = directoryName;
+            }
+            documentFile.CreateDirectory(name);
+        }
+
+        public bool DeleteItemFromPath(string path)
         {
             
             var item=new Java.IO.File(path);
-            if (item.Exists() && item.CanExecute())
+            if (item.Exists())
             {
-                item.Delete();
-               
+               var status = item.Delete();
+                return status;
             }
             else
             {
-                throw new Exception();
+                throw new Exception("Obiekt nie istnieje");
             }
            
+        }
+
+        public void DeleteItemFromUri(DocumentFile documentFile, string name)
+        {
+            var itemToDelete = documentFile.FindFile(name);
+            itemToDelete?.Delete();
         }
 
     }
