@@ -10,6 +10,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Views.Animations;
 using Android.Widget;
+using Android.OS;
 using AndroidMusicPlayer.Manager;
 using Java.Lang;
 using Java.Util;
@@ -42,11 +43,6 @@ namespace AndroidMusicPlayer
             _fileExplorer = fileExplorer;
             _listView.ItemClick += Item_Click;
         }
-
-
-       
-
-
         private void List_touch(object sender, View.TouchEventArgs e)
         {
             var child = _listView.GetChildAt(0);
@@ -54,7 +50,8 @@ namespace AndroidMusicPlayer
             var scroll = -child.Top + _listView.FirstVisiblePosition*height;
             var point = _listView.PointToPosition((int)e.Event.GetX(),(int) e.Event.GetY());
             var  itemView = _listView.GetChildAt(point-scroll/height);
-           
+            var upTime = Android.OS.SystemClock.UptimeMillis();
+            var downTime = upTime - e.Event.DownTime;
             if (e.Event.Action == MotionEventActions.Down)
             {
                
@@ -69,9 +66,9 @@ namespace AndroidMusicPlayer
                 itemView?.SetPadding(0, 0, 0, 0);
             }
             
-            if (e.Event.Action == MotionEventActions.Move )
+            if (e.Event.Action == MotionEventActions.Move && downTime>200 )
             {
-
+                
                 var currentX = e.Event.RawX;
                 var currentY = e.Event.RawY;
                 var slide = currentX - _startX;
@@ -121,8 +118,6 @@ namespace AndroidMusicPlayer
 
                 FileClick?.Invoke(item);
 
-
-
             }
             else
             {
@@ -155,22 +150,18 @@ namespace AndroidMusicPlayer
         
         public void EditModeEnabled()
         {
-           _currentAdapter.StartAnimate();
+            _currentAdapter.RunAnimation = true;
+            _currentAdapter.NotifyDataSetChanged();
             _listView.Touch += List_touch;
             _listView.ItemClick -= Item_Click;
         }
 
         public void EditModeDisabled()
         {
-           _currentAdapter.StopAnimation();
+            _currentAdapter.RunAnimation = false;
+            _currentAdapter.NotifyDataSetChanged();
             _listView.Touch -= List_touch;
             _listView.ItemClick += Item_Click;
         }
-
-      
-      
-
-
-        
     }
 }

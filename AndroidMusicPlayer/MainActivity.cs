@@ -14,16 +14,23 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using Android.OS.Storage;
+using Android.Provider;
+using Android.Support.V4.Provider;
 using Android.Util;
+using Android.Views.Animations;
+using Android.Webkit;
 using AndroidMusicPlayer.Manager;
 using Java.IO;
 using Java.Lang;
+using Java.Net;
 using Newtonsoft.Json;
 using Java.Util;
 using Javax.Security.Auth;
 using Exception = System.Exception;
 using Orientation = Android.Widget.Orientation;
 using String = System.String;
+using Uri = Android.Net.Uri;
 
 namespace AndroidMusicPlayer
 {
@@ -189,8 +196,13 @@ namespace AndroidMusicPlayer
 
             try
             {
-
+                int requestCode = 0;
                 var startPath = GetExternalStorage();
+                StorageManager storageManager = (StorageManager)GetSystemService(Context.StorageService);
+                var storageVolume = storageManager.StorageVolumes[1];
+                Intent accessIntent = storageVolume.CreateAccessIntent(null);
+              StartActivityForResult(accessIntent,requestCode);
+             
                 RemoveStartMenu();
                 CreateExplorerMenu("Pamięć wewnętrzna");
                 CreateListView();
@@ -210,7 +222,17 @@ namespace AndroidMusicPlayer
 
         }
 
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        {
+            if (resultCode == Result.Ok)
+            {
+                var receivedData = data;
+                var uri = receivedData.Data;
+               DocumentFile documentFile=DocumentFile.FromTreeUri(this,uri);
+               documentFile.CreateDirectory("MojFolder");
 
+            }
+        }
 
         public void CreateExplorerMenu(string sourceBtnText)
         {
@@ -332,13 +354,13 @@ namespace AndroidMusicPlayer
             {
                 listView.Add(_fileExplorer.GetPreviousDirectory());
             }
-           
 
             listView.AddRange(await _fileExplorer.GetDirectoryAsync());
             listView.AddRange(await _fileExplorer.GetFileAsync());
             if (_adapter==null)
             {
-                _adapter=new ExplorerViewAdapter(this,listView.ToArray());
+                var animation = GetEditAnimation();
+                _adapter =new ExplorerViewAdapter(this,listView.ToArray(),animation);
                 _explorerListHandler.SetCurrentAdapter(_adapter);
             }
 
@@ -359,13 +381,22 @@ namespace AndroidMusicPlayer
             listView.AddRange(await _fileExplorer.GetFileAsync());
             if (_adapter == null)
             {
-                _adapter = new ExplorerViewAdapter(this, listView.ToArray());
+                var animation = GetEditAnimation();
+                _adapter = new ExplorerViewAdapter(this, listView.ToArray(),animation);
                 _explorerListHandler.SetCurrentAdapter(_adapter);
             }
 
             _explorerListHandler.Update(listView);
         }
 
+        public Animation GetEditAnimation()
+        {
+            var rotateAnimation = new RotateAnimation(0.0f, 2.5f);
+            rotateAnimation.RepeatCount = ValueAnimator.Infinite;
+            rotateAnimation.Duration = 400;
+            rotateAnimation.RepeatMode = RepeatMode.Reverse;
+            return rotateAnimation;
+        }
         public  void Directory_click(ExplorerListViewModel item)
         {   
             _currentPath = item.FullPath;

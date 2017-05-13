@@ -25,46 +25,16 @@ namespace AndroidMusicPlayer
     {
         private List<ExplorerListViewModel> _explorerList;
         private Context _context;
-        private List<Animator> _animators;
-        private AnimatorSet _animatorSet;
-        private bool _runAnimation;
-        public ExplorerViewAdapter(Context context, ExplorerListViewModel[] explorerList)
+        private Animation _animation;
+        public bool RunAnimation;
+        public ExplorerViewAdapter(Context context, ExplorerListViewModel[] explorerList, Animation animation)
         {
             _explorerList = explorerList.ToList();
             _context = context;
-            _animators=new List<Animator>();
-        }
-
-        public void StartAnimate(int position)
-        {
-            _animators[position].Start();
-        }
-
-        public void StartAnimate()
-        {
-
-            _animatorSet = new AnimatorSet();
-            _animatorSet.PlayTogether(_animators);
-            _runAnimation = true;
-            _animatorSet.AnimationEnd += (object sender, EventArgs eve) =>
-            {
-                if (_runAnimation)
-                {
-                    _animatorSet.StartDelay = 1000;
-                    _animatorSet.Start();
-                }
-                
-            };
-            _animatorSet.Start();
+            _animation = animation;
+           
 
         }
-
-        public void StopAnimation()
-        {
-            _runAnimation = false;
-        }
-
-       
         public void UpdateAdapter(ExplorerListViewModel[] explorerList)
         {
             _explorerList = explorerList.ToList();
@@ -104,14 +74,26 @@ namespace AndroidMusicPlayer
             {
                 imageView.SetImageResource(Resource.Drawable.folderIcon);
             }
-            var animator = ObjectAnimator.OfFloat(view, "rotation", 0.0f, 2.5f);
-            animator.RepeatCount = 1;
-            animator.SetDuration(200);
-            animator.RepeatMode = ValueAnimatorRepeatMode.Reverse;
-           
-            _animators.Add(animator);
+
+            if (RunAnimation)
+            {
+                if (_animation!=null)
+                {
+                    view.StartAnimation(_animation);
+                }
+                
+            }
+            else
+            {
+                view.Animation?.Cancel();
+            }
 
             return view;
+        }
+
+        public override bool IsEnabled(int position)
+        {
+            return !RunAnimation;
         }
 
         public ExplorerListViewModel GetItemFromId(long id)
